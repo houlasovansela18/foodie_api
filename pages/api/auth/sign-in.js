@@ -54,29 +54,44 @@ export default async function handler(req, res) {
 				...user,
 				lastSignIn: d.toDateString(),
 			};
-			await db
+			const updatedUser = await db
 				.collection(db_collection)
-				.updateOne({ email: userData.email }, { $set: updateUser });
-			clientEmail.send(
-				{
-					text: `
-						\nHello! ${userData.username}
-						\nBrand: ${device.brand}
-						\nDeviceName: ${device.deviceName}
-						\nModelName: ${device.modalName}
-						\nOS: ${device.osName}
-						\nVersion: ${device.osVersion} 
-						\nis login to your account.
-						\nContact us(${gmail}) if this isn't you!
-						\nThank FOODIE team!`,
-					from: `FOODIE <${gmail}>`,
-					to: `<${userData.email}>`,
-					subject: "[FOODIE] New login notice from FOODIE",
-				},
-				(err, message) => {
-					console.log(err || message);
-				}
-			);
+				.updateOne(
+					{ email: userData.email, userType: userData.userType },
+					{ $set: updateUser }
+				);
+			if (!updatedUser.acknowledged)
+				return res.status(422).json({
+					status: "error",
+					error: "unable to update lastSignIn!",
+				});
+			try {
+				clientEmail.send(
+					{
+						text: `
+							\nHello! ${user.username}
+							\nBrand: ${device.brand}
+							\nDeviceName: ${device.deviceName}
+							\nModelName: ${device.modalName}
+							\nOS: ${device.osName}
+							\nVersion: ${device.osVersion} 
+							\nis login to your account.
+							\nContact us(${gmail}) if this isn't you!
+							\nThank FOODIE team!`,
+						from: `FOODIE <${gmail}>`,
+						to: `<${user.email}>`,
+						subject: "[FOODIE] New login notice from FOODIE",
+					},
+					(err, message) => {
+						console.log(err || message);
+					}
+				);
+			} catch (error) {
+				return res.status(500).json({
+					status: "error",
+					error: "Unable to send email notification!",
+				});
+			}
 			return res.status(200).json({
 				status: "success",
 				message: "log in successfully",
@@ -106,7 +121,10 @@ export default async function handler(req, res) {
 		};
 		await db
 			.collection(db_collection)
-			.updateOne({ userId: userData.userId }, { $set: updateUser });
+			.updateOne(
+				{ userId: userData.userId, userType: userData.userType },
+				{ $set: updateUser }
+			);
 		clientEmail.send(
 			{
 				text: `
