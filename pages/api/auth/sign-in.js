@@ -54,22 +54,21 @@ export default async function handler(req, res) {
 				...user,
 				lastSignIn: d.toDateString(),
 			};
-			const updatedUser = await db
+			const updatedUserDB = await db
 				.collection(db_collection)
 				.updateOne(
 					{ email: userData.email, userType: userData.userType },
 					{ $set: updateUser }
 				);
-			if (!updatedUser.acknowledged)
+			if (!updatedUserDB.acknowledged)
 				return res.status(422).json({
 					status: "error",
 					error: "unable to update lastSignIn!",
 				});
-			try {
-				clientEmail.send(
-					{
-						text: `
-							\nHello! ${user.username}
+			clientEmail.send(
+				{
+					text: `
+							\nHello! ${updateUser.username}
 							\nBrand: ${device.brand}
 							\nDeviceName: ${device.deviceName}
 							\nModelName: ${device.modalName}
@@ -78,20 +77,15 @@ export default async function handler(req, res) {
 							\nis login to your account.
 							\nContact us(${gmail}) if this isn't you!
 							\nThank FOODIE team!`,
-						from: `FOODIE <${gmail}>`,
-						to: `<${user.email}>`,
-						subject: "[FOODIE] New login notice from FOODIE",
-					},
-					(err, message) => {
-						console.log(err || message);
-					}
-				);
-			} catch (error) {
-				return res.status(500).json({
-					status: "error",
-					error: "Unable to send email notification!",
-				});
-			}
+					from: `FOODIE <${gmail}>`,
+					to: `<${updateUser.email}>`,
+					cc: `Contact us at <${gmail}>`,
+					subject: "[FOODIE] New login notice from FOODIE",
+				},
+				(err, message) => {
+					console.log(err || message);
+				}
+			);
 			return res.status(200).json({
 				status: "success",
 				message: "log in successfully",
@@ -139,6 +133,7 @@ export default async function handler(req, res) {
 					\nThank FOODIE team!`,
 				from: `FOODIE <${gmail}>`,
 				to: `<${userData.email}>`,
+				cc: `Contact us at <${gmail}>`,
 				subject: "[FOODIE] New login notice from FOODIE",
 			},
 			(err, message) => {
