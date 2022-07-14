@@ -28,34 +28,36 @@ export default async function handler(req, res) {
 	const gmail = process.env.gmail;
 	const users = await db
 		.collection(db_collection)
-		.find({ email: body.email, userType: "foodie-user" })
-		.toArray();
-	users.forEach(async (user) => {
-		try {
-			const message = await clientEmail.sendAsync({
-				text: `
-						\nHello! ${user.username}
-						\nIs real device: ${device.isDevice}
-						\nBrand: ${device.brand}
-						\nDeviceName: ${device.deviceName}
-						\nModelName: ${device.modalName}
-						\nOS: ${device.osName}
-						\nVersion: ${device.osVersion} 
-						\nis trying to change your password.
-						\nContact us(${gmail}) if this isn't you!
-						\nThank FOODIE team!`,
-				from: `<${gmail}>`,
-				to: `<${body.email}>`,
-				subject: "[FOODIE] Password reset notice from FOODIE",
+		.findOne({ email: body.email, userType: "foodie-user" });
+	// .toArray();
+	// users.forEach(async (user) => {
+
+	// });
+	await clientEmail
+		.sendAsync({
+			text: `
+				\nHello! ${users.username}
+				\nIs real device: ${device.isDevice}
+				\nBrand: ${device.brand}
+				\nDeviceName: ${device.deviceName}
+				\nModelName: ${device.modalName}
+				\nOS: ${device.osName}
+				\nVersion: ${device.osVersion} 
+				\nis trying to change your password.
+				\nContact us(${gmail}) if this isn't you!
+				\nThank FOODIE team!`,
+			from: `<${gmail}>`,
+			to: `<${body.email}>`,
+			subject: "[FOODIE] Password reset notice from FOODIE",
+		})
+		.then((message) => {
+			return res.status(200).json({
+				status: "success",
+				success: true,
+				data: users,
 			});
+		})
+		.catch((message) => {
 			console.log(message);
-		} catch (err) {
-			console.error(err);
-		}
-	});
-	return res.status(200).json({
-		status: "success",
-		success: true,
-		data: users,
-	});
+		});
 }
