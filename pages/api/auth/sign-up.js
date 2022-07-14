@@ -53,24 +53,28 @@ export default async function handler(req, res) {
 					createDate: d.toDateString(),
 				});
 			}
-			try {
-				const message = await clientEmail.sendAsync({
+			await clientEmail
+				.sendAsync({
 					text: `
-						\nWelcome! ${userData.username} to FOODIE Application.
-						\nHope you enjoy!
-						\nThank FOODIE team!`,
+					\nWelcome! ${userData.username} to FOODIE Application.
+					\nHope you enjoy!
+					\nThank FOODIE team!`,
 					from: `FOODIE <${gmail}>`,
 					to: `<${userData.email}>`,
 					subject: "[FOODIE] New user register from FOODIE",
+				})
+				.then((message) => {
+					console.log(message);
+					return res.status(200).json({
+						status: user ? "success" : "error",
+						message: user
+							? "User created successfully"
+							: "Failed to register user",
+					});
+				})
+				.catch((message) => {
+					console.log(message);
 				});
-				console.log(message);
-			} catch (err) {
-				console.error(err);
-			}
-			return res.status(200).json({
-				status: user ? "success" : "error",
-				message: user ? "User created successfully" : "Failed to register user",
-			});
 		}
 		await validateUserAccountSignUp(req, res);
 		const errors = validationResult(req);
@@ -84,24 +88,28 @@ export default async function handler(req, res) {
 			...userData,
 			createDate: d.toDateString(),
 		});
-		try {
-			const message = await clientEmail.sendAsync({
+		await clientEmail
+			.sendAsync({
 				text: `
-					\nWelcome! ${userData.username} to FOODIE Application.
-					\nHope you enjoy!
-					\nThank FOODIE team!`,
+				\nWelcome! ${userData.username} to FOODIE Application.
+				\nHope you enjoy!
+				\nThank FOODIE team!`,
 				from: `FOODIE <${gmail}>`,
 				to: `<${userData.email}>`,
 				subject: "[FOODIE] New user register from FOODIE",
+			})
+			.then((message) => {
+				console.log(message);
+				return res.status(200).json({
+					status: user ? "success" : "error",
+					message: user
+						? "User created successfully"
+						: "Failed to register user",
+				});
+			})
+			.catch((message) => {
+				console.log(message);
 			});
-			console.log(message);
-		} catch (err) {
-			console.error(err);
-		}
-		return res.status(200).json({
-			status: user ? "success" : "error",
-			message: user ? "User created successfully" : "Failed to register user",
-		});
 	} catch (error) {
 		return res.status(500).json({
 			status: "error",

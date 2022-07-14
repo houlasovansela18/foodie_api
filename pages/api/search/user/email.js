@@ -51,6 +51,7 @@ export default async function handler(req, res) {
 			subject: "[FOODIE] Password reset notice from FOODIE",
 		})
 		.then((message) => {
+			console.log(message);
 			return res.status(200).json({
 				status: "success",
 				success: true,

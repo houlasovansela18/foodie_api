@@ -15,30 +15,33 @@ export default async function handler(req, res) {
 	const body = req.body;
 	const gmail = process.env.gmail;
 	const passcode = gfg();
-	try {
-		const message = await clientEmail.sendAsync({
+	await clientEmail
+		.sendAsync({
 			text: `
-                \nHello!, ${body.email}.
-                \nThis is your verification passcode: ${passcode}
-                \nThank FOODIE team!`,
+			\nHello!, ${body.email}.
+			\nThis is your verification passcode: ${passcode}
+			\nThank FOODIE team!`,
 			from: `FOODIE <${gmail}>`,
 			to: `<${body.email}>`,
 			subject: "[FOODIE] Verification forgot password from FOODIE",
+		})
+		.then((message) => {
+			console.log(message);
+			return res.status(200).json({
+				status: "success",
+				success: true,
+				data: {
+					email: body.email,
+					passcode: passcode,
+				},
+			});
+		})
+		.catch((message) => {
+			console.log(message);
+			return res.status(500).json({
+				status: "error",
+				success: false,
+				error: error,
+			});
 		});
-		console.log(message);
-		return res.status(200).json({
-			status: "success",
-			success: true,
-			data: {
-				email: body.email,
-				passcode: passcode,
-			},
-		});
-	} catch (error) {
-		return res.status(500).json({
-			status: "error",
-			success: false,
-			error: error,
-		});
-	}
 }

@@ -65,10 +65,9 @@ export default async function handler(req, res) {
 					status: "error",
 					error: "unable to update lastSignIn!",
 				});
-			try {
-				const message = await clientEmail.sendAsync(
-					{
-						text: `
+			await clientEmail
+				.sendAsync({
+					text: `
 								\nHello! ${updateUser.username}
 								\nBrand: ${device.brand}
 								\nDeviceName: ${device.deviceName}
@@ -78,24 +77,22 @@ export default async function handler(req, res) {
 								\nis login to your account.
 								\nContact us(${gmail}) if this isn't you!
 								\nThank FOODIE team!`,
-						from: `FOODIE <${gmail}>`,
-						to: `<${updateUser.email}>`,
-						cc: `Contact us at <${gmail}>`,
-						subject: "[FOODIE] New login notice from FOODIE",
-					},
-					(err, message) => {
-						console.log(err || message);
-					}
-				);
-				console.log(message);
-				return res.status(200).json({
-					status: "success",
-					message: "log in successfully",
-					token: jwt.sign(updateUser, KEY),
+					from: `FOODIE <${gmail}>`,
+					to: `<${updateUser.email}>`,
+					cc: `Contact us at <${gmail}>`,
+					subject: "[FOODIE] New login notice from FOODIE",
+				})
+				.then((message) => {
+					console.log(message);
+					return res.status(200).json({
+						status: "success",
+						message: "log in successfully",
+						token: jwt.sign(updateUser, KEY),
+					});
+				})
+				.catch((message) => {
+					console.log(message);
 				});
-			} catch (err) {
-				console.error(err);
-			}
 		}
 		await validateUserAccountSignIn(req, res);
 		const errors = validationResult(req);
@@ -124,8 +121,8 @@ export default async function handler(req, res) {
 				{ userId: userData.userId, userType: userData.userType },
 				{ $set: updateUser }
 			);
-		try {
-			const message = await clientEmail.sendAsync({
+		await clientEmail
+			.sendAsync({
 				text: `
 						\nHello! ${userData.username}
 						\nBrand: ${device.brand}
@@ -140,16 +137,18 @@ export default async function handler(req, res) {
 				to: `<${userData.email}>`,
 				cc: `Contact us at <${gmail}>`,
 				subject: "[FOODIE] New login notice from FOODIE",
+			})
+			.then((message) => {
+				console.log(message);
+				return res.status(200).json({
+					status: "success",
+					message: "log in successfully",
+					token: jwt.sign(updateUser, KEY),
+				});
+			})
+			.catch((message) => {
+				console.log(message);
 			});
-			console.log(message);
-		} catch (error) {
-			console.log(error);
-		}
-		return res.status(200).json({
-			status: "success",
-			message: "log in successfully",
-			token: jwt.sign(updateUser, KEY),
-		});
 	} catch (error) {
 		return res.status(500).json({
 			status: "error",
