@@ -44,7 +44,7 @@ export default async function handler(req, res) {
 						\nis trying to change your password.
 						\nContact us(${gmail}) if this isn't you!
 						\nThank FOODIE team!`,
-				from: `FOODIE <${gmail}>`,
+				from: `<${gmail}>`,
 				to: `<${body.email}>`,
 				subject: "[FOODIE] Password reset notice from FOODIE",
 			});
