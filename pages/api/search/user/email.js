@@ -20,45 +20,49 @@ export default async function handler(req, res) {
 			error: errors.array()[0].msg,
 		});
 	}
-	const body = req.body;
-	const device = body.device;
-	const clientDB = await clientPromise;
-	const db = clientDB.db();
-	const db_collection = process.env.user_collections;
-	const gmail = process.env.gmail;
-	const users = await db
-		.collection(db_collection)
-		.findOne({ email: body.email, userType: "foodie-user" });
-	// .toArray();
-	// users.forEach(async (user) => {
+	try {
+		const body = req.body;
+		const device = body.device;
+		const clientDB = await clientPromise;
+		const db = clientDB.db();
+		const db_collection = process.env.user_collections;
+		const gmail = process.env.gmail;
+		const users = await db
+			.collection(db_collection)
+			.findOne({ email: body.email, userType: "foodie-user" });
+		// .toArray();
+		// users.forEach(async (user) => {
 
-	// });
-	await clientEmail
-		.sendAsync({
-			text: `
-				\nHello! ${users.username}
-				\nIs real device: ${device.isDevice}
-				\nBrand: ${device.brand}
-				\nDeviceName: ${device.deviceName}
-				\nModelName: ${device.modalName}
-				\nOS: ${device.osName}
-				\nVersion: ${device.osVersion} 
-				\nis trying to change your password.
-				\nContact us(${gmail}) if this isn't you!
-				\nThank FOODIE team!`,
-			from: `<${gmail}>`,
-			to: `<${body.email}>`,
-			subject: "[FOODIE] Password reset notice from FOODIE",
-		})
-		.then((message) => {
-			console.log(message);
-			return res.status(200).json({
-				status: "success",
-				success: true,
-				data: users,
+		// });
+		await clientEmail
+			.sendAsync({
+				text: `
+					\nHello! ${users.username}
+					\nIs real device: ${device.isDevice}
+					\nBrand: ${device.brand}
+					\nDeviceName: ${device.deviceName}
+					\nModelName: ${device.modalName}
+					\nOS: ${device.osName}
+					\nVersion: ${device.osVersion} 
+					\nis trying to change your password.
+					\nContact us(${gmail}) if this isn't you!
+					\nThank FOODIE team!`,
+				from: `<${gmail}>`,
+				to: `<${body.email}>`,
+				subject: "[FOODIE] Password reset notice from FOODIE",
+			})
+			.then((message) => {
+				console.log(message);
+				return res.status(200).json({
+					status: "success",
+					success: true,
+					data: users,
+				});
 			});
-		})
-		.catch((message) => {
-			console.log(message);
+	} catch (error) {
+		return res.status(500).json({
+			status: "error",
+			error: message,
 		});
+	}
 }

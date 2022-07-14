@@ -54,6 +54,7 @@ export default async function handler(req, res) {
 				...user,
 				lastSignIn: d.toDateString(),
 			};
+			const token = jwt.sign(updateUser, KEY);
 			const updatedUserDB = await db
 				.collection(db_collection)
 				.updateOne(
@@ -65,34 +66,38 @@ export default async function handler(req, res) {
 					status: "error",
 					error: "unable to update lastSignIn!",
 				});
-			await clientEmail
-				.sendAsync({
-					text: `
-								\nHello! ${updateUser.username}
-								\nBrand: ${device.brand}
-								\nDeviceName: ${device.deviceName}
-								\nModelName: ${device.modalName}
-								\nOS: ${device.osName}
-								\nVersion: ${device.osVersion} 
-								\nis login to your account.
-								\nContact us(${gmail}) if this isn't you!
-								\nThank FOODIE team!`,
-					from: `FOODIE <${gmail}>`,
-					to: `<${updateUser.email}>`,
-					cc: `Contact us at <${gmail}>`,
-					subject: "[FOODIE] New login notice from FOODIE",
-				})
-				.then((message) => {
-					console.log(message);
-					return res.status(200).json({
-						status: "success",
-						message: "log in successfully",
-						token: jwt.sign(updateUser, KEY),
+
+			if (userData.email)
+				await clientEmail
+					.sendAsync({
+						text: `
+									\nHello! ${userData.username}
+									\nBrand: ${device.brand}
+									\nDeviceName: ${device.deviceName}
+									\nModelName: ${device.modalName}
+									\nOS: ${device.osName}
+									\nVersion: ${device.osVersion} 
+									\nis login to your account.
+									\nContact us(${gmail}) if this isn't you!
+									\nThank FOODIE team!`,
+						from: `FOODIE <${gmail}>`,
+						to: `<${userData.email}>`,
+						cc: `Contact us at <${gmail}>`,
+						subject: "[FOODIE] New login notice from FOODIE",
+					})
+					.then((message) => {
+						console.log(message);
+						return res.status(200).json({
+							status: "success",
+							message: "log in successfully",
+							token: token,
+						});
 					});
-				})
-				.catch((message) => {
-					console.log(message);
-				});
+			return res.status(200).json({
+				status: "success",
+				message: "log in successfully",
+				token: token,
+			});
 		}
 		await validateUserAccountSignIn(req, res);
 		const errors = validationResult(req);
@@ -115,40 +120,44 @@ export default async function handler(req, res) {
 			...isUserAccountExisted,
 			lastSignIn: d.toDateString(),
 		};
+		const token = jwt.sign(updateUser, KEY);
 		await db
 			.collection(db_collection)
 			.updateOne(
 				{ userId: userData.userId, userType: userData.userType },
 				{ $set: updateUser }
 			);
-		await clientEmail
-			.sendAsync({
-				text: `
-						\nHello! ${userData.username}
-						\nBrand: ${device.brand}
-						\nDeviceName: ${device.deviceName}
-						\nModelName: ${device.modalName}
-						\nOS: ${device.osName}
-						\nVersion: ${device.osVersion} 
-						\nis login to your account.
-						\nContact us(${gmail}) if this isn't you!
-						\nThank FOODIE team!`,
-				from: `FOODIE <${gmail}>`,
-				to: `<${userData.email}>`,
-				cc: `Contact us at <${gmail}>`,
-				subject: "[FOODIE] New login notice from FOODIE",
-			})
-			.then((message) => {
-				console.log(message);
-				return res.status(200).json({
-					status: "success",
-					message: "log in successfully",
-					token: jwt.sign(updateUser, KEY),
+		if (userData.email)
+			await clientEmail
+				.sendAsync({
+					text: `
+								\nHello! ${userData.username}
+								\nBrand: ${device.brand}
+								\nDeviceName: ${device.deviceName}
+								\nModelName: ${device.modalName}
+								\nOS: ${device.osName}
+								\nVersion: ${device.osVersion} 
+								\nis login to your account.
+								\nContact us(${gmail}) if this isn't you!
+								\nThank FOODIE team!`,
+					from: `FOODIE <${gmail}>`,
+					to: `<${userData.email}>`,
+					cc: `Contact us at <${gmail}>`,
+					subject: "[FOODIE] New login notice from FOODIE",
+				})
+				.then((message) => {
+					console.log(message);
+					return res.status(200).json({
+						status: "success",
+						message: "log in successfully",
+						token: token,
+					});
 				});
-			})
-			.catch((message) => {
-				console.log(message);
-			});
+		return res.status(200).json({
+			status: "success",
+			message: "log in successfully",
+			token: token,
+		});
 	} catch (error) {
 		return res.status(500).json({
 			status: "error",

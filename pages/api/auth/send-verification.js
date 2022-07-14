@@ -12,36 +12,42 @@ export default async function handler(req, res) {
 			error: "Only POST requests allowed",
 		});
 	}
-	const body = req.body;
-	const gmail = process.env.gmail;
-	const passcode = gfg();
-	await clientEmail
-		.sendAsync({
-			text: `
-			\nHello!, ${body.email}.
-			\nThis is your verification passcode: ${passcode}
-			\nThank FOODIE team!`,
-			from: `FOODIE <${gmail}>`,
-			to: `<${body.email}>`,
-			subject: "[FOODIE] Verification forgot password from FOODIE",
-		})
-		.then((message) => {
-			console.log(message);
-			return res.status(200).json({
-				status: "success",
-				success: true,
-				data: {
-					email: body.email,
-					passcode: passcode,
-				},
-			});
-		})
-		.catch((message) => {
-			console.log(message);
-			return res.status(500).json({
-				status: "error",
-				success: false,
-				error: error,
-			});
+	try {
+		const body = req.body;
+		const gmail = process.env.gmail;
+		const passcode = gfg();
+		if (body.email)
+			await clientEmail
+				.sendAsync({
+					text: `
+				\nHello!, ${body.email}.
+				\nThis is your verification passcode: ${passcode}
+				\nThank FOODIE team!`,
+					from: `FOODIE <${gmail}>`,
+					to: `<${body.email}>`,
+					subject: "[FOODIE] Verification passcode from FOODIE",
+				})
+				.then((message) => {
+					console.log(message);
+					return res.status(200).json({
+						status: "success",
+						success: true,
+						data: {
+							email: body.email,
+							passcode: passcode,
+						},
+					});
+				});
+		return res.status(500).json({
+			status: "error",
+			success: false,
+			error: "email is required!",
 		});
+	} catch (error) {
+		return res.status(500).json({
+			status: "error",
+			success: false,
+			error: error,
+		});
+	}
 }
