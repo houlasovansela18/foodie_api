@@ -20,44 +20,43 @@ export default async function handler(req, res) {
 			error: errors.array()[0].msg,
 		});
 	}
+	const body = req.body;
+	const device = body.device;
+	const clientDB = await clientPromise;
+	const db = clientDB.db();
+	const db_collection = process.env.user_collections;
+	const gmail = process.env.gmail;
 	try {
-		const body = req.body;
-		const device = body.device;
-		const clientDB = await clientPromise;
-		const db = clientDB.db();
-		const db_collection = process.env.user_collections;
-		const gmail = process.env.gmail;
 		const users = await db
 			.collection(db_collection)
-			.find({ email: body.email, userType: "foodie-user" })
-			.toArray();
-		users.forEach(async (user) => {
+			.findOne({ email: body.email, userType: "foodie-user" });
+		if (body.email)
 			await clientEmail.sendAsync({
 				text: `
-						\nHello! ${user.username}
-						\nIs real device: ${device.isDevice}
-						\nBrand: ${device.brand}
-						\nDeviceName: ${device.deviceName}
-						\nModelName: ${device.modalName}
-						\nOS: ${device.osName}
-						\nVersion: ${device.osVersion} 
-						\nis trying to change your password.
-						\nContact us(${gmail}) if this isn't you!
-						\nThank FOODIE team!`,
+					\nHello! ${users.username}
+					\nIs real device: ${device.isDevice ? device.isDevice : "false"}
+					\nBrand: ${device.brand ? device.brand : "Invalid Brand"}
+					\nDeviceName: ${device.deviceName ? device.deviceName : "Invalid DeviceName"}
+					\nModelName: ${device.modalName ? device.modalName : "Invalid ModelName"}
+					\nOS: ${device.osName ? device.osName : "Invalid OS"}
+					\nVersion: ${device.osVersion ? device.osVersion : "Invalid Version"} 
+					\nis trying to change your password.
+					\nContact us(${gmail}) if this isn't you!
+					\nThank FOODIE team!`,
 				from: `<${gmail}>`,
 				to: `<${body.email}>`,
 				subject: "[FOODIE] Password reset notice from FOODIE",
 			});
-		});
 		return res.status(200).json({
 			status: "success",
 			success: true,
-			data: users,
+			data: [users],
 		});
 	} catch (error) {
 		return res.status(500).json({
 			status: "error",
-			error: message,
+			success: false,
+			error: error,
 		});
 	}
 }
