@@ -68,10 +68,9 @@ export default async function handler(req, res) {
 				});
 
 			if (userData.email)
-				await clientEmail
-					.sendAsync({
-						text: `
-									\nHello! ${userData.username}
+				await clientEmail.sendAsync({
+					text: `
+									\nHello! ${updateUser.username}
 									\nBrand: ${device.brand}
 									\nDeviceName: ${device.deviceName}
 									\nModelName: ${device.modalName}
@@ -80,19 +79,11 @@ export default async function handler(req, res) {
 									\nis login to your account.
 									\nContact us(${gmail}) if this isn't you!
 									\nThank FOODIE team!`,
-						from: `FOODIE <${gmail}>`,
-						to: `<${userData.email}>`,
-						cc: `Contact us at <${gmail}>`,
-						subject: "[FOODIE] New login notice from FOODIE",
-					})
-					.then((message) => {
-						console.log(message);
-						return res.status(200).json({
-							status: "success",
-							message: "log in successfully",
-							token: token,
-						});
-					});
+					from: `FOODIE <${gmail}>`,
+					to: `<${updateUser.email}>`,
+					cc: `Contact us at <${gmail}>`,
+					subject: "[FOODIE] New login notice from FOODIE",
+				});
 			return res.status(200).json({
 				status: "success",
 				message: "log in successfully",
@@ -128,9 +119,8 @@ export default async function handler(req, res) {
 				{ $set: updateUser }
 			);
 		if (userData.email)
-			await clientEmail
-				.sendAsync({
-					text: `
+			await clientEmail.sendAsync({
+				text: `
 								\nHello! ${userData.username}
 								\nBrand: ${device.brand}
 								\nDeviceName: ${device.deviceName}
@@ -140,19 +130,11 @@ export default async function handler(req, res) {
 								\nis login to your account.
 								\nContact us(${gmail}) if this isn't you!
 								\nThank FOODIE team!`,
-					from: `FOODIE <${gmail}>`,
-					to: `<${userData.email}>`,
-					cc: `Contact us at <${gmail}>`,
-					subject: "[FOODIE] New login notice from FOODIE",
-				})
-				.then((message) => {
-					console.log(message);
-					return res.status(200).json({
-						status: "success",
-						message: "log in successfully",
-						token: token,
-					});
-				});
+				from: `FOODIE <${gmail}>`,
+				to: `<${userData.email}>`,
+				cc: `Contact us at <${gmail}>`,
+				subject: "[FOODIE] New login notice from FOODIE",
+			});
 		return res.status(200).json({
 			status: "success",
 			message: "log in successfully",

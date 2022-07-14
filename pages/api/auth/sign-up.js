@@ -54,25 +54,15 @@ export default async function handler(req, res) {
 				});
 			}
 			if (userData.email)
-				await clientEmail
-					.sendAsync({
-						text: `
+				await clientEmail.sendAsync({
+					text: `
 					\nWelcome! ${userData.username} to FOODIE Application.
 					\nHope you enjoy!
 					\nThank FOODIE team!`,
-						from: `FOODIE <${gmail}>`,
-						to: `<${userData.email}>`,
-						subject: "[FOODIE] New user register from FOODIE",
-					})
-					.then((message) => {
-						console.log(message);
-						return res.status(200).json({
-							status: user ? "success" : "error",
-							message: user
-								? "User created successfully"
-								: "Failed to register user",
-						});
-					});
+					from: `FOODIE <${gmail}>`,
+					to: `<${userData.email}>`,
+					subject: "[FOODIE] New user register from FOODIE",
+				});
 			return res.status(200).json({
 				status: user ? "success" : "error",
 				message: user ? "User created successfully" : "Failed to register user",
@@ -91,25 +81,15 @@ export default async function handler(req, res) {
 			createDate: d.toDateString(),
 		});
 		if (userData.email)
-			await clientEmail
-				.sendAsync({
-					text: `
+			await clientEmail.sendAsync({
+				text: `
 				\nWelcome! ${userData.username} to FOODIE Application.
 				\nHope you enjoy!
 				\nThank FOODIE team!`,
-					from: `FOODIE <${gmail}>`,
-					to: `<${userData.email}>`,
-					subject: "[FOODIE] New user register from FOODIE",
-				})
-				.then((message) => {
-					console.log(message);
-					return res.status(200).json({
-						status: user ? "success" : "error",
-						message: user
-							? "User created successfully"
-							: "Failed to register user",
-					});
-				});
+				from: `FOODIE <${gmail}>`,
+				to: `<${userData.email}>`,
+				subject: "[FOODIE] New user register from FOODIE",
+			});
 		return res.status(200).json({
 			status: user ? "success" : "error",
 			message: user ? "User created successfully" : "Failed to register user",
