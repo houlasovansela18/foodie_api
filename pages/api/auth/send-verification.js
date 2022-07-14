@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 	const gmail = process.env.gmail;
 	const passcode = gfg();
 	try {
-		clientEmail.send({
+		const message = await clientEmail.sendAsync({
 			text: `
                 \nHello!, ${body.email}.
                 \nThis is your verification passcode: ${passcode}
@@ -25,6 +25,7 @@ export default async function handler(req, res) {
 			to: `<${body.email}>`,
 			subject: "[FOODIE] Verification forgot password from FOODIE",
 		});
+		console.log(message);
 		return res.status(200).json({
 			status: "success",
 			success: true,
@@ -37,7 +38,7 @@ export default async function handler(req, res) {
 		return res.status(500).json({
 			status: "error",
 			success: false,
-			error: "internal server error",
+			error: error,
 		});
 	}
 }

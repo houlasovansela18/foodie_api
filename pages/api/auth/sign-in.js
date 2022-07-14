@@ -65,32 +65,37 @@ export default async function handler(req, res) {
 					status: "error",
 					error: "unable to update lastSignIn!",
 				});
-			clientEmail.send(
-				{
-					text: `
-							\nHello! ${updateUser.username}
-							\nBrand: ${device.brand}
-							\nDeviceName: ${device.deviceName}
-							\nModelName: ${device.modalName}
-							\nOS: ${device.osName}
-							\nVersion: ${device.osVersion} 
-							\nis login to your account.
-							\nContact us(${gmail}) if this isn't you!
-							\nThank FOODIE team!`,
-					from: `FOODIE <${gmail}>`,
-					to: `<${updateUser.email}>`,
-					cc: `Contact us at <${gmail}>`,
-					subject: "[FOODIE] New login notice from FOODIE",
-				},
-				(err, message) => {
-					console.log(err || message);
-				}
-			);
-			return res.status(200).json({
-				status: "success",
-				message: "log in successfully",
-				token: jwt.sign(updateUser, KEY),
-			});
+			try {
+				const message = await clientEmail.sendAsync(
+					{
+						text: `
+								\nHello! ${updateUser.username}
+								\nBrand: ${device.brand}
+								\nDeviceName: ${device.deviceName}
+								\nModelName: ${device.modalName}
+								\nOS: ${device.osName}
+								\nVersion: ${device.osVersion} 
+								\nis login to your account.
+								\nContact us(${gmail}) if this isn't you!
+								\nThank FOODIE team!`,
+						from: `FOODIE <${gmail}>`,
+						to: `<${updateUser.email}>`,
+						cc: `Contact us at <${gmail}>`,
+						subject: "[FOODIE] New login notice from FOODIE",
+					},
+					(err, message) => {
+						console.log(err || message);
+					}
+				);
+				console.log(message);
+				return res.status(200).json({
+					status: "success",
+					message: "log in successfully",
+					token: jwt.sign(updateUser, KEY),
+				});
+			} catch (err) {
+				console.error(err);
+			}
 		}
 		await validateUserAccountSignIn(req, res);
 		const errors = validationResult(req);
@@ -119,27 +124,27 @@ export default async function handler(req, res) {
 				{ userId: userData.userId, userType: userData.userType },
 				{ $set: updateUser }
 			);
-		clientEmail.send(
-			{
+		try {
+			const message = await clientEmail.sendAsync({
 				text: `
-					\nHello! ${userData.username}
-					\nBrand: ${device.brand}
-					\nDeviceName: ${device.deviceName}
-					\nModelName: ${device.modalName}
-					\nOS: ${device.osName}
-					\nVersion: ${device.osVersion} 
-					\nis login to your account.
-					\nContact us(${gmail}) if this isn't you!
-					\nThank FOODIE team!`,
+						\nHello! ${userData.username}
+						\nBrand: ${device.brand}
+						\nDeviceName: ${device.deviceName}
+						\nModelName: ${device.modalName}
+						\nOS: ${device.osName}
+						\nVersion: ${device.osVersion} 
+						\nis login to your account.
+						\nContact us(${gmail}) if this isn't you!
+						\nThank FOODIE team!`,
 				from: `FOODIE <${gmail}>`,
 				to: `<${userData.email}>`,
 				cc: `Contact us at <${gmail}>`,
 				subject: "[FOODIE] New login notice from FOODIE",
-			},
-			(err, message) => {
-				console.log(err || message);
-			}
-		);
+			});
+			console.log(message);
+		} catch (error) {
+			console.log(error);
+		}
 		return res.status(200).json({
 			status: "success",
 			message: "log in successfully",
